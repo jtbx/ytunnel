@@ -1,0 +1,181 @@
+#!/usr/bin/env sh
+# simple and flexible configure script for people who don't like to waste time
+# licensed to the public domain
+
+set -e
+
+import=import
+
+mkf=Makefile
+objs='ytunnel.o ytdl.o'
+srcs='ytunnel.d ytdl.d'
+
+makefile='
+PREFIX    = /usr/local
+MANPREFIX = ${PREFIX}/man
+
+DC      = ${_DC}
+CFLAGS  = ${_CFLAGS}
+OBJS    = ${_OBJS}
+
+all: ytunnel
+
+ytunnel: ${OBJS}
+	${DC} ${_LDFLAGS} -of=$@ ${OBJS}
+
+.SUFFIXES: .d .o
+
+.d.o:
+	${DC} ${CFLAGS} -c $<
+
+clean:
+	rm -f ytunnel ${OBJS}
+
+install: ytunnel
+	install -m755 ytunnel ${DESTDIR}${PREFIX}/bin/ytunnel
+	cp -f ytunnel.1 ${DESTDIR}${MANPREFIX}/man1
+
+.PHONY: all clean install
+'
+
+# utility functions
+
+present () {
+	command -v "$1" 1>/dev/null 2>/dev/null
+}
+using () {
+	>&2 printf "using $1\n"
+}
+error () {
+	>&2 printf "$(basename $0): $1\n"
+	exit 1
+}
+
+# generators
+
+## D compiler
+gen_DC () {
+	if ! [ -z "$dc" ]; then
+		using "$dc"
+		return 0
+	fi
+	if present ldc2; then
+		dc=ldc2
+	elif present dmd; then
+		dc=dmd
+	else
+		error "D compiler not found; install ldc or dmd"
+	fi
+
+	using "$dc"
+}
+
+## flags used in the compilation step
+gen_CFLAGS () {
+	if [ -z "$debug" ]; then
+		case "$dc" in
+			ldc2) cflags="-Oz";;
+			 dmd) cflags="-O";;
+		 esac
+	else
+		cflags="-g"
+		case "$dc" in
+			ldc2) cflags="$cflags -O0 -d-debug";;
+			 dmd) cflags="$cflags -debug";;
+		esac
+	fi
+
+	for flag in $cflags; do
+		using "$flag"
+	done
+}
+
+## flags used in the linking step
+gen_LDFLAGS () {
+	if [ "$dc" = ldc2 ]; then
+		if present ld.lld; then
+			ldflags="-linker=lld"
+		elif present ld.gold; then
+			ldflags="-linker=gold"
+		fi
+	fi
+	if [ -z "$debug" ]; then
+		if ! [ -z "$ldflags" ]; then ldflags="$ldflags "; fi
+		ldflags="$ldflags-L--gc-sections"
+	fi
+
+	for flag in $ldflags; do
+		using "$flag"
+	done
+}
+
+# command line interface
+
+while getopts c:dhr ch; do
+	case "$ch" in
+		c)
+			case "$OPTARG" in
+				ldc2) dc="ldc2" ;;
+				dmd)  dc="dmd"  ;;
+				*) error "unknown D compiler '$OPTARG' specified (valid options: ldc2, dmd)" ;;
+			esac
+			;;
+		d) debug=1 ;;
+		r) unset debug ;;
+		h)
+			cat <<EOF
+configure: create an optimised makefile for the current environment
+
+options:
+  -c: force use of a particular compiler (dmd or ldc2)
+  -d: build in debug mode, with debug symbols and statements enabled
+  -r: build in release mode with optimisation flags enabled (default)
+  -h: show this help message
+EOF
+			exit 0
+			;;
+		?) exit 1 ;;
+		:) exit 1 ;;
+	esac
+done
+
+# creating the makefile
+
+u_cflags="$cflags"
+unset cflags
+
+gen_DC
+gen_CFLAGS
+gen_LDFLAGS
+
+rm -f "$mkf"
+printf '# begin generated definitions' >>"$mkf"
+printf '
+_DC = %s
+_CFLAGS = %s
+_LDFLAGS = %s
+'              \
+	"$dc"      \
+	"$u_cflags $cflags" \
+	"$ldflags" \
+		>>"$mkf"
+## generate obj list
+printf '_OBJS =' >>"$mkf"
+for obj in $objs; do
+	printf " $obj" >>"$mkf"
+done
+printf '\n' >>"$mkf"
+printf '# end generated definitions\n' >>"$mkf"
+
+printf "$makefile" >>"$mkf"
+
+## generate dependency list
+>&2 printf "generating dependency list\n"
+printf '\n# begin generated dependencies\n' >>"$mkf"
+i=1
+for obj in $objs; do
+	"$dc" $u_cflags -O0 -o- -makedeps \
+		"$(printf "$srcs" | awk '{print $'"$i"'}')" >>"$mkf"
+	i="$(($i + 1))"
+done
+printf '# end generated dependencies\n' >>"$mkf"
