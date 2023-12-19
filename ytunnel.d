@@ -1,5 +1,5 @@
 /*
- * ytunnel: download YouTube media in batch
+ * ytunnel: download content from YouTube in large batches
  *
  * The GPLv2 License (GPLv2)
  * Copyright (c) 2023 Jeremy Baxter
