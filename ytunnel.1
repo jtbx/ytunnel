@@ -58,8 +58,20 @@ a title
 would become
 .Dq Learn the Greek Alphabet in 10 minutes.mp4 .
 .Pp
+If a line begins with a hash character
+.Sm off
+(
+.Dq #
+),
+.Sm on
+it is classified as a
+.Dq comment line
+and is ignored. This can be used to divide a register into different sections 
+for instance.
+.Pp
 As an example, here is a valid register file:
 .Pp
+.Dl # videos
 .Dl https://www.youtube.com/watch?v=BaW_jenozKc
 .Dl https://youtu.be/w0JzdPqlSmg
 .Dl jNQXAC9IVRw Me at the zoo

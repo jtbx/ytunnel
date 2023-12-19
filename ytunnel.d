@@ -156,6 +156,12 @@ run(string[] args) @safe
 
 	foreach (char[] line; register.lineSplitter()) {
 		MediaConfig m;
+		
+		line = line.strip();
+
+		/* detect comment */
+		if (line[0] == '#')
+			continue;
 
 		/* parse configuration line */
 		auto result = line.findSplit(" ");
