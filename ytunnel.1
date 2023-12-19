@@ -1,0 +1,133 @@
+.Dd $Mdocdate: Dec 19 2023 $
+.Dt ytunnel 1
+.Os
+.Sh NAME
+.Nm ytunnel
+.Nd download content from YouTube in large batches
+.Sh SYNOPSIS
+.Nm ytunnel
+.Bk -words
+.Op Fl Vv
+.Op Fl f Ar register
+.Op Fl t Ar type
+.Ar dir
+.Ek
+.Sh DESCRIPTION
+.Nm
+downloads content from the Internet video website YouTube.
+It leverages
+.Xr yt-dlp 1
+to download the content, and
+.Xr ffmpeg 1
+to convert the content to the specified format.
+The content, once downloaded and converted, will be placed in the
+directory specified by
+.Ar dir .
+By default
+.Nm
+outputs audio files of file type
+.Em flac ,
+but this can be changed by specifying the
+.Fl v
+and
+.Fl t
+options described below.
+.Pp
+.Nm
+uses a file written in a certain format to describe the content that 
+should be retrieved. This file is named the
+.Em register .
+In this file, each line should consist of a YouTube video URL. The plain video ID
+is also accepted. Its location can be found in the
+.Sx FILES
+section of this manual.
+.Pp
+Following the URL, a title can optionally be provided after a space character.
+This specifies the name of the output file that is downloaded from the given
+YouTube video. If this is not given, a request is made to youtube.com to
+retrieve the video's title, and this is done before any content is retrieved.
+.Pp
+After the content has been converted, the name of the output file takes the
+name of the content given in the register, or if this is not given, the name
+of the YouTube video. The title, manually provided or not, always has a dot
+character followed by the file type concatenated on the end of the file name.
+Using the file type
+.Em mp4 ,
+a title
+.Dq Learn the Greek Alphabet in 10 minutes
+would become
+.Dq Learn the Greek Alphabet in 10 minutes.mp4 .
+.Pp
+As an example, here is a valid register file:
+.Pp
+.Dl https://www.youtube.com/watch?v=BaW_jenozKc
+.Dl https://youtu.be/w0JzdPqlSmg
+.Dl jNQXAC9IVRw Me at the zoo
+.Pp
+The options are as follows:
+.Bl -tag -width keyword
+.It Fl f Ar register
+Use the register file specified by
+.Ar register
+rather than the default location (see section
+.Sm off
+.Sx FILES
+).
+.Sm on
+.It Fl t Ar type
+Convert content to the file type specified by
+.Ar type
+(default is
+.Sm off
+.Em flac
+).
+.Sm on
+The
+.Ar type
+argument is not checked for errors and is directly passed to
+.Xr ffmpeg 1 ,
+which will fail if
+.Ar type
+is invalid.
+.It Fl V
+Display the version number and exit.
+.It Fl v
+Download video files rather than audio files. Note that this does
+.Sy not
+change the default conversion file type from
+.Em flac
+to a video format, meaning your video files will be converted to
+audio after they are downloaded. Use
+.Fl t
+with this flag to set a sensible video format to convert to afterwards,
+otherwise your content will be converted to audio, slowing your download
+speeds with no good result.
+.Sh FILES
+.Bl -tag -width iiii
+.It Pa ~/.config/ytunnel/register
+default register file location
+.El
+
+.Sh EXAMPLES
+Retrieve all content in the register at path
+.Pa myregister
+and place them in the directory
+.Pa ~/music :
+.Pp
+.Dl ytunnel -f myregister ~/music
+.Pp
+Retrieve all content in the register as video files of type
+.Em mkv ,
+and place them in the directory
+.Pa videos :
+.Pp
+.Dl ytunnel -v -t mkv videos
+.Pp
+Retrieve all content in the default register with default settings, and
+place them in the current directory:
+.Pp
+.Dl ytunnel\ .
+.Pp
+
+.Sh SEE ALSO
+.Xr ffmpeg 1

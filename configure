@@ -32,6 +32,8 @@ clean:
 	rm -f ytunnel ${OBJS}
 
 install: ytunnel
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	install -m755 ytunnel ${DESTDIR}${PREFIX}/bin/ytunnel
 	cp -f ytunnel.1 ${DESTDIR}${MANPREFIX}/man1
 
