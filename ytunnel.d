@@ -20,6 +20,7 @@
 
 module ytunnel;
 
+import std.ascii     : toLower;
 import std.algorithm : findSplit, startsWith;
 import std.conv      : to;
 import std.exception : enforce;
@@ -160,11 +161,12 @@ run(string[] args) @safe
 		auto result = line.findSplit(" ");
 		try {
 			m.id = separateYouTubeID(result[0]).strip();
+			enforce(validYouTubeVideoID(m.id), "invalid video ID: " ~ m.id);
 			m.name = result[1] == "" ?
 				youTubeVideoTitle(m.id) : /* download video title and use it */
 				result[2].strip().idup(); /* use the given custom title */
 		} catch (YouTubeURLException e)
-			throw new Exception(e.msg);
+			throw new Exception(firstToLower(e.msg));
 
 		mconfs.length++;
 		mconfs[mconfs.length - 1] = m;
@@ -183,8 +185,20 @@ run(string[] args) @safe
 		try
 			downloadYouTubeVideo(m.id, vFlag ? null : "bestaudio", dest);
 		catch (YouTubeDownloadException e)
-			throw new Exception(e.msg);
+			throw new Exception(firstToLower(e.msg));
+		catch (YouTubeURLException e)
+			throw new Exception(firstToLower(e.msg));
 	}
 
 	return true;
+}
+
+string
+firstToLower(in string s) @safe
+{
+	char[] s2;
+
+	s2 = s.dup();
+	s2[0] = toLower(s[0]);
+	return s2.idup();
 }
