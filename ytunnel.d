@@ -134,9 +134,9 @@ run(string[] args) @safe
 
 		enforce(
 			executeShell(
-				format!"command -v %s >/dev/null 2>&1"(prog)
+				"command -v " ~ prog ~ " >/dev/null 2>&1"
 			).status == 0,
-			format!"cannot find %s"(prog));
+			"cannot find " ~ prog);
 	}
 	
 	/* decide register path */
