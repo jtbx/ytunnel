@@ -48,10 +48,25 @@ bool   VFlag;  /* show version */
 
 File stderr;
 
+version (OpenBSD) {
+	immutable(char) *promises;
+}
+
 int
 main(string[] args) @safe
 {
 	bool success;
+
+	/* this evilness is required because I don't want to turn
+	 * this into a whole new function just to use pledge() in
+	 * a safe manner, or mark main() as @trusted */
+	version (OpenBSD) function void() @trusted {
+		import core.sys.openbsd.unistd : pledge;
+		import std.string : toStringz;
+
+		promises = toStringz("stdio rpath wpath cpath inet dns proc exec prot_exec");
+		pledge(promises, null);
+	}();
 
 	/* @safe way of opening stderr on Unix */
 	stderr = File("/dev/stderr", "w");
