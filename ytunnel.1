@@ -1,4 +1,4 @@
-.Dd $Mdocdate: Dec 19 2023 $
+.Dd $Mdocdate: Dec 20 2023 $
 .Dt YTUNNEL 1
 .Os
 .Sh NAME
@@ -116,8 +116,12 @@ otherwise your content will be converted to audio, slowing your download
 speeds with no good result.
 .Sh FILES
 .Bl -tag -width iiii
-.It Pa ~/.config/ytunnel/register
-default register file location
+.It Pa $XDG_CONFIG_HOME/ytunnel/register
+Default register file location. If
+.Ev XDG_CONFIG_HOME
+is not set,
+.Pa $HOME/.config
+is used in its place.
 .El
 
 .Sh EXAMPLES

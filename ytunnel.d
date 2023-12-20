@@ -134,7 +134,9 @@ run(string[] args) @safe
 	enforce(homeDir, "cannot determine home directory; please set HOME");
 
 	/* decide register path */
-	registerPath = expandTilde(fFlag ? fFlag : "~/.config/ytunnel/register");
+	registerPath = fFlag ? expandTilde(fFlag) :
+		(environment.get("XDG_CONFIG_HOME", homeDir ~ "/.config")
+			~ "/ytunnel/register");
 
 	/* read whole file */
 	try {
