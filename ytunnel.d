@@ -24,15 +24,12 @@ import std.ascii     : toLower;
 import std.algorithm : findSplit, startsWith;
 import std.conv      : to;
 import std.exception : enforce;
-import std.file   : chdir, exists, mkdirRecurse, read, write, FileException;
-import std.format : format;
-import std.getopt : getopt, GetOptException;
-import std.path   : baseName, dirName, expandTilde;
-import std.stdio  : File, writeln, writefln;
-import std.string : lineSplitter, strip;
-import std.typecons : Tuple;
-
-import core.sys.posix.unistd : isatty;
+import std.file     : chdir, exists, mkdirRecurse, read, write, FileException;
+import std.format   : format;
+import std.getopt   : getopt, GetOptException;
+import std.path     : baseName, dirName, expandTilde;
+import std.stdio    : File, writeln, writefln;
+import std.string   : lineSplitter, strip;
 
 import ytdl;
 
@@ -43,7 +40,6 @@ string tFlag;  /* media type */
 bool   vFlag;  /* video */
 bool   VFlag;  /* show version */
 
-bool stdoutIsTTY;
 File stderr;
 
 struct MediaConfig
@@ -127,31 +123,22 @@ run(string[] args) @safe
 		return false;
 	}
 
-	stdoutIsTTY = isatty(1) == 1 ? true : false;
 
 	foreach (string prog; ["yt-dlp", "ffmpeg"]) {
 		import std.process : executeShell;
 
-		enforce(
-			executeShell(
-				"command -v " ~ prog ~ " >/dev/null 2>&1"
-			).status == 0,
+		enforce(executeShell(">/dev/null 2>&1 command -v " ~ prog).status == 0,
 			"cannot find " ~ prog);
 	}
 	
 	/* decide register path */
 	registerPath = expandTilde(fFlag ? fFlag : "~/.config/ytunnel/register");
-	mkdirRecurse(dirName(registerPath));
-	
-	if (!registerPath.exists())
-		registerPath.write("");
 
 	/* read whole file */
-	register = registerPath.read().to!(char[]);
-
-	try
+	try {
+		register = registerPath.read().to!(char[]);
 		chdir(args[1]);
-	catch (FileException e)
+	} catch (FileException e)
 		throw new Exception(e.msg);
 
 	foreach (char[] line; register.lineSplitter()) {
@@ -170,7 +157,7 @@ run(string[] args) @safe
 			enforce(validYouTubeVideoID(m.id), "invalid video ID: " ~ m.id);
 			m.name = result[1] == "" ?
 				youTubeVideoTitle(m.id) : /* download video title and use it */
-				result[2].strip().idup(); /* use the given custom title */
+				result[2].strip().idup(); /* use the given title */
 		} catch (YouTubeURLException e)
 			throw new Exception(firstToLower(e.msg));
 
