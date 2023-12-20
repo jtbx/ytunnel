@@ -34,6 +34,11 @@ import std.string   : lineSplitter, strip;
 
 import ytdl;
 
+struct MediaConfig
+{
+	string name, id;
+}
+
 enum VERSION = "0.0.0";
 
 string fFlag;  /* register file */
@@ -42,12 +47,6 @@ bool   vFlag;  /* video */
 bool   VFlag;  /* show version */
 
 File stderr;
-
-struct MediaConfig
-{
-	string name;
-	string id;
-}
 
 int
 main(string[] args) @safe
