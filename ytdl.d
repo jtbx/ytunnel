@@ -42,6 +42,29 @@ class YouTubeDownloadException : Exception
 }
 
 /**
+ * Returns true if the given string is
+ * a valid YouTube video ID.
+ */
+bool
+validYouTubeVideoID(in char[] id) @safe pure
+{
+	import std.ascii : letters, digits;
+
+	string validCharacters = letters ~ digits ~ "-_";
+
+	if (id.length != 11)
+		return false;
+
+	return all!(ch => validCharacters.canFind(ch))(id);
+}
+
+private void
+enforceID(in char[] id) @safe
+{
+	enforce!YouTubeURLException(validYouTubeVideoID(id), "Invalid video ID");
+}
+
+/**
  * Separates a YouTube video URL from its ID.
  * Works with youtube.com/watch?v= and youtu.be.
  * If the URL isn't detected to be a youtube.com/watch?v
@@ -88,35 +111,16 @@ separateYouTubeID(in char[] url) @safe pure
 }
 
 /**
- * Returns true if the given string is
- * a valid YouTube video ID.
- */
-bool
-validYouTubeVideoID(in char[] id) @safe pure
-{
-	import std.ascii : letters, digits;
-
-	string validCharacters = letters ~ digits ~ "-_";
-	
-	if (id.length != 11)
-		return false;
-
-	return all!(ch => validCharacters.canFind(ch))(id);
-}
-
-/**
  * Makes a request to YouTube's oEmbed API and 
  * returns the given video ID's title as a string.
  */
 string
 youTubeVideoTitle(in char[] id) @trusted
-in {
-	enforce!YouTubeURLException(validYouTubeVideoID(id), "Invalid video ID");
-}
-do
 {
 	import std.json     : parseJSON;
 	import std.net.curl : get;
+
+	enforceID(id);
 
 	return get(
 		"https://www.youtube.com/oembed?format=json&url=http%3A//youtube.com/watch%3Fv%3D"
@@ -146,10 +150,6 @@ do
  */
 void
 downloadYouTubeVideo(string id, scope const(char[]) fmt, string dest) @trusted
-in {
-	enforce!YouTubeURLException(validYouTubeVideoID(id), "Invalid video ID");
-}
-do
 {
 	import std.file : dirEntries, DirEntry, remove, rename, SpanMode;
 
@@ -168,6 +168,8 @@ do
 		enforce!YouTubeDownloadException(status == 0,
 			args[0] ~ " failed with exit code " ~ status.to!string());
 	}
+
+	enforceID(id);
 
 	yTmp = id ~ ".ytmp";
 
