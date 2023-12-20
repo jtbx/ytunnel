@@ -28,6 +28,7 @@ import std.file     : chdir, exists, mkdirRecurse, read, write, FileException;
 import std.format   : format;
 import std.getopt   : getopt, GetOptException;
 import std.path     : baseName, dirName, expandTilde;
+import std.process  : environment, executeShell;
 import std.stdio    : File, writeln, writefln;
 import std.string   : lineSplitter, strip;
 
@@ -82,7 +83,7 @@ bool
 run(string[] args) @safe
 {
 	char[] register;
-	string registerPath;
+	string registerPath, homeDir;
 	size_t lineno;
 	MediaConfig[] mconfs;
 
@@ -124,14 +125,14 @@ run(string[] args) @safe
 		return false;
 	}
 
-
 	foreach (string prog; ["yt-dlp", "ffmpeg"]) {
-		import std.process : executeShell;
-
 		enforce(executeShell(">/dev/null 2>&1 command -v " ~ prog).status == 0,
 			"cannot find " ~ prog);
 	}
 	
+	homeDir = environment.get("HOME", null);
+	enforce(homeDir, "cannot determine home directory; please set HOME");
+
 	/* decide register path */
 	registerPath = expandTilde(fFlag ? fFlag : "~/.config/ytunnel/register");
 
