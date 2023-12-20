@@ -83,6 +83,7 @@ run(string[] args) @safe
 {
 	char[] register;
 	string registerPath;
+	size_t lineno;
 	MediaConfig[] mconfs;
 
 	fFlag = null;
@@ -141,9 +142,11 @@ run(string[] args) @safe
 	} catch (FileException e)
 		throw new Exception(e.msg);
 
+	lineno = 0;
 	foreach (char[] line; register.lineSplitter()) {
 		MediaConfig m;
 		
+		lineno++;
 		line = line.strip();
 
 		/* detect comment */
@@ -154,7 +157,8 @@ run(string[] args) @safe
 		auto result = line.findSplit(" ");
 		try {
 			m.id = separateYouTubeID(result[0]).strip();
-			enforce(validYouTubeVideoID(m.id), "invalid video ID: " ~ m.id);
+			enforcef(validYouTubeVideoID(m.id), "%s:%d: invalid video ID: %s",
+				registerPath, lineno, m.id);
 			m.name = result[1] == "" ?
 				youTubeVideoTitle(m.id) : /* download video title and use it */
 				result[2].strip().idup(); /* use the given title */
@@ -184,6 +188,12 @@ run(string[] args) @safe
 	}
 
 	return true;
+}
+
+T
+enforcef(T, A...)(T value, string msg, A args) @safe
+{
+	return enforce(value, msg.format(args));
 }
 
 string
