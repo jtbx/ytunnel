@@ -24,15 +24,6 @@ import std.algorithm : all, canFind, findSplitBefore, startsWith;
 import std.exception : basicExceptionCtors, enforce;
 
 /**
- * Exception thrown when an invalid URL
- * to a YouTube video is provided.
- */
-class YouTubeURLException : Exception
-{
-	mixin basicExceptionCtors;
-}
-
-/**
  * Exception thrown when failure of downloading or
  * converting YouTube media occurs.
  */
@@ -56,12 +47,6 @@ validYouTubeVideoID(in char[] id) @safe pure
 		return false;
 
 	return all!(ch => validCharacters.canFind(ch))(id);
-}
-
-private void
-enforceID(in char[] id) @safe
-{
-	enforce!YouTubeURLException(validYouTubeVideoID(id), "Invalid video ID");
 }
 
 /**
@@ -116,11 +101,11 @@ separateYouTubeID(in char[] url) @safe pure
  */
 string
 youTubeVideoTitle(in char[] id) @trusted
+in (validYouTubeVideoID(id), "Invalid video ID")
 {
 	import std.json     : parseJSON;
 	import std.net.curl : get;
 
-	enforceID(id);
 
 	return get(
 		"https://www.youtube.com/oembed?format=json&url=http%3A//youtube.com/watch%3Fv%3D"
@@ -150,6 +135,7 @@ youTubeVideoTitle(in char[] id) @trusted
  */
 void
 downloadYouTubeVideo(string id, scope const(char[]) fmt, string dest) @trusted
+in (validYouTubeVideoID(id), "Invalid video ID")
 {
 	import std.file : dirEntries, DirEntry, remove, rename, SpanMode;
 
@@ -168,8 +154,6 @@ downloadYouTubeVideo(string id, scope const(char[]) fmt, string dest) @trusted
 		enforce!YouTubeDownloadException(status == 0,
 			args[0] ~ " failed with exit code " ~ status.to!string());
 	}
-
-	enforceID(id);
 
 	yTmp = id ~ ".ytmp";
 

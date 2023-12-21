@@ -172,15 +172,12 @@ run(string[] args) @safe
 
 		/* parse configuration line */
 		auto result = line.findSplit(" ");
-		try {
-			m.id = separateYouTubeID(result[0]).strip();
-			enforcef(validYouTubeVideoID(m.id), "%s:%d: invalid video ID: %s",
-				registerPath, lineno, m.id);
-			m.name = result[1] == "" ?
-				youTubeVideoTitle(m.id) : /* download video title and use it */
-				result[2].strip().idup(); /* use the given title */
-		} catch (YouTubeURLException e)
-			throw new Exception(firstToLower(e.msg));
+		m.id = separateYouTubeID(result[0]).strip();
+		enforcef(validYouTubeVideoID(m.id), "%s:%d: invalid video ID: %s",
+			registerPath, lineno, m.id);
+		m.name = result[1] == "" ?
+			youTubeVideoTitle(m.id) : /* download video title and use it */
+			result[2].strip().idup(); /* use the given title */
 
 		mconfs.length++;
 		mconfs[mconfs.length - 1] = m;
@@ -199,8 +196,6 @@ run(string[] args) @safe
 		try
 			downloadYouTubeVideo(m.id, vFlag ? null : "bestaudio", dest);
 		catch (YouTubeDownloadException e)
-			throw new Exception(firstToLower(e.msg));
-		catch (YouTubeURLException e)
 			throw new Exception(firstToLower(e.msg));
 	}
 
