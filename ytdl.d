@@ -96,8 +96,8 @@ separateYouTubeID(in char[] url) @safe pure
 }
 
 /**
- * Makes a request to YouTube's oEmbed API and 
- * returns the given video ID's title as a string.
+ * Makes a request to youtube.com and returns
+ * the given video ID's title as a string.
  */
 string
 youTubeVideoTitle(in char[] id) @trusted
@@ -126,7 +126,9 @@ in (validYouTubeVideoID(id), "Invalid video ID")
  * setting for yt-dlp (bestvideo*+bestaudio/best).
  *
  * After downloading is complete, the media will be
- * converted using ffmpeg into 
+ * converted using ffmpeg into the file extension
+ * specified by dest, e.g. a dest file of song.mp3
+ * will convert the content into that of an mp3 format.
  *
  * Throws ProcessException if failure to start a process
  * (yt-dlp or ffmpeg) occurs, FileException if traversing
@@ -161,11 +163,13 @@ in (validYouTubeVideoID(id), "Invalid video ID")
 		"-f", fmt == null ? "bestvideo*+bestaudio/best" : fmt,
 		"-o", yTmp, "--", id]);
 
-	/* yt-dlp can sometimes create output files with names that
+	/*
+	 * yt-dlp can sometimes create output files with names that
 	 * have an extra extension on the end; this code looks for
 	 * a file (not a directory) that begins with the specified
 	 * output file name, and renames it to the intended output
-	 * file. */
+	 * file.
+	 */
 	foreach (DirEntry ent; dirEntries(".", yTmp ~ ".*", SpanMode.shallow)) {
 		if (!ent.isDir && ent.isFile) {
 			rename(ent.name, yTmp);
