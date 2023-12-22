@@ -15,13 +15,13 @@ PREFIX    = /usr/local
 MANPREFIX = ${PREFIX}/man
 
 DC      = ${_DC}
-CFLAGS  = ${_CFLAGS}
+CFLAGS  = ${_CFLAGS} -wi
 OBJS    = ${_OBJS}
 
 all: ytunnel
 
 ytunnel: ${OBJS}
-	${DC} ${_LDFLAGS} -of=$@ ${OBJS}
+	${DC} ${LDFLAGS} -of=$@ ${OBJS}
 
 .SUFFIXES: .d .o
 
