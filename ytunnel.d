@@ -98,7 +98,6 @@ run(string[] args) @safe
 {
 	char[] register;
 	string registerPath, homeDir;
-	size_t lineno;
 	MediaConfig[] mconfs;
 
 	fFlag = null;
@@ -159,30 +158,7 @@ run(string[] args) @safe
 	} catch (FileException e)
 		throw new Exception(e.msg);
 
-	lineno = 0;
-	foreach (char[] line; register.lineSplitter()) {
-		MediaConfig m;
-		
-		lineno++;
-		line = line.strip();
-
-		/* detect comment */
-		if (line[0] == '#')
-			continue;
-
-		/* parse configuration line */
-		auto result = line.findSplit(" ");
-		m.id = separateYouTubeID(result[0]).strip();
-		enforcef(validYouTubeVideoID(m.id), "%s:%d: invalid video ID: %s",
-			registerPath, lineno, m.id);
-		m.name = result[1] == "" ?
-			youTubeVideoTitle(m.id) : /* download video title and use it */
-			result[2].strip().idup(); /* use the given title */
-
-		mconfs.length++;
-		mconfs[mconfs.length - 1] = m;
-	}
-	
+	parseRegister(register, registerPath, mconfs);
 	foreach (MediaConfig m; mconfs) {
 		string dest;
 
@@ -216,4 +192,33 @@ firstToLower(in string s) @safe
 	s2 = s.dup();
 	s2[0] = toLower(s[0]);
 	return s2.idup();
+}
+
+void
+parseRegister(char[] register, string path, ref MediaConfig[] mconfs) @safe
+{
+	MediaConfig m;
+	size_t lineno;
+
+	lineno = 0;
+	foreach (char[] line; register.lineSplitter()) {
+		lineno++;
+		line = line.strip();
+
+		/* detect comment */
+		if (line[0] == '#')
+			continue;
+
+		/* parse configuration line */
+		auto result = line.findSplit(" ");
+		m.id = separateYouTubeID(result[0]).strip();
+		enforcef(validYouTubeVideoID(m.id), "%s:%d: invalid video ID: %s",
+			path, lineno, m.id);
+		m.name = result[1] == "" ?
+			youTubeVideoTitle(m.id) : /* download video title and use it */
+			result[2].strip().idup(); /* use the given title */
+
+		mconfs.length++;
+		mconfs[mconfs.length - 1] = m;
+	}
 }
