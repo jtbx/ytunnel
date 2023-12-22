@@ -24,13 +24,13 @@ import std.ascii     : toLower;
 import std.algorithm : findSplit, startsWith;
 import std.conv      : to;
 import std.exception : enforce;
-import std.file     : chdir, exists, mkdirRecurse, read, write, FileException;
-import std.format   : format;
-import std.getopt   : getopt, GetOptException;
-import std.path     : baseName, dirName, expandTilde;
-import std.process  : environment, executeShell;
-import std.stdio    : File, writeln, writefln;
-import std.string   : lineSplitter, strip;
+import std.file      : chdir, exists, mkdirRecurse, read, write, FileException;
+import std.format    : format;
+import std.getopt    : getopt, GetOptException;
+import std.path      : baseName, dirName, expandTilde;
+import std.process   : environment, executeShell;
+import std.stdio     : File, writeln, writefln;
+import std.string    : lineSplitter, strip;
 
 import ytdl;
 
@@ -43,8 +43,8 @@ enum VERSION = "0.0.0";
 
 string fFlag;  /* register file */
 string tFlag;  /* media type */
-bool   vFlag;  /* video */
 bool   VFlag;  /* show version */
+bool   vFlag;  /* video */
 
 File stderr;
 
