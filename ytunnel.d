@@ -60,7 +60,7 @@ main(string[] args) @safe
 	/* this evilness is required because I don't want to turn
 	 * this into a whole new function just to use pledge() in
 	 * a safe manner, or mark main() as @trusted */
-	version (OpenBSD) function void() @trusted {
+	version (OpenBSD) () @trusted {
 		import core.sys.openbsd.unistd : pledge;
 		import std.string : toStringz;
 
