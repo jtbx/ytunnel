@@ -205,8 +205,8 @@ parseRegister(char[] register, string path, ref MediaConfig[] mconfs) @safe
 		lineno++;
 		line = line.strip();
 
-		/* detect comment */
-		if (line[0] == '#')
+		/* detect comment or empty line */
+		if (line == "" || line[0] == '#')
 			continue;
 
 		/* parse configuration line */
