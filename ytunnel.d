@@ -29,6 +29,7 @@ import std.format    : format;
 import std.getopt    : getopt, GetOptException;
 import std.path      : baseName, dirName, expandTilde;
 import std.process   : environment, executeShell;
+import std.regex     : ctRegex, matchFirst, replaceAll;
 import std.stdio     : File, writeln, writefln;
 import std.string    : lineSplitter, strip;
 
@@ -164,6 +165,11 @@ run(string[] args) @safe
 
 		writefln("%s\t%s", m.id, m.name);
 		dest = format!"%s.%s"(m.name, tFlag);
+		if (!dest.matchFirst(ctRegex!"/").empty) {
+			stderr.writeln(baseName(args[0]),
+				": video title contains a misleading slash (path separator); replacing with '|'");
+			dest = dest.replaceAll(ctRegex!"/", `|`);
+		}
 
 		/* if the file exists, skip */
 		if (dest.exists())
