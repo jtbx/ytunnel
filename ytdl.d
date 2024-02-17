@@ -106,7 +106,6 @@ in (validYouTubeVideoID(id), "Invalid video ID")
 	import std.json     : parseJSON;
 	import std.net.curl : get;
 
-
 	return get(
 		"https://www.youtube.com/oembed?format=json&url=http%3A//youtube.com/watch%3Fv%3D"
 		~ id).parseJSON()["title"].str;
@@ -139,10 +138,10 @@ void
 downloadYouTubeVideo(string id, scope const(char[]) fmt, string dest) @trusted
 in (validYouTubeVideoID(id), "Invalid video ID")
 {
-	import std.file : dirEntries, DirEntry, remove, rename, SpanMode;
+	import std.file : dirEntries, remove, rename, DirEntry, SpanMode;
 
 	string yTmp;
-	
+
 	void
 	spawn(scope const(char[])[] args)
 	{
