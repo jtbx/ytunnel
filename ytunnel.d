@@ -133,7 +133,7 @@ run(string[] args) @safe
 	}
 	
 	if (args.length != 2) {
-		stderr.writefln("usage: %s [-Vv] [-f register] [-t type]",
+		stderr.writefln("usage: %s [-Vv] [-f register] [-t type] destination",
 			baseName(args[0]));
 		return false;
 	}
