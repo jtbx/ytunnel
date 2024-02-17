@@ -177,7 +177,7 @@ in (validYouTubeVideoID(id), "Invalid video ID")
 	}
 
 	spawn(["ffmpeg", "-hide_banner", "-loglevel", "error",
-		"-y", "-i", yTmp, dest]);
+		"-y", "-i", yTmp, "file:" ~ dest]);
 
 	remove(yTmp);
 }
