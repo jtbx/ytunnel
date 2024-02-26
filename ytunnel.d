@@ -129,7 +129,7 @@ run(string[] args) @safe
 	}
 
 	if (VFlag) {
-		writeln("ytunnel version " ~ VERSION);
+		writeln("ytunnel " ~ VERSION);
 		return true;
 	}
 	
